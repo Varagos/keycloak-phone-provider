@@ -30,6 +30,7 @@ public abstract class BaseDirectGrantAuthenticator implements Authenticator {
     }
 
     protected void invalidCredentials(AuthenticationFlowContext context,AuthenticationFlowError error){
+        System.out.println("BaseDirectGrantAuthenticator=>invalidCredentials: " + context);
         context.getEvent().error(Errors.INVALID_USER_CREDENTIALS);
         Response challenge = errorResponse(Response.Status.UNAUTHORIZED.getStatusCode(), "invalid_grant", "Invalid user credentials");
         context.failure(error, challenge);

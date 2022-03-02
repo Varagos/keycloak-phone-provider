@@ -28,15 +28,19 @@ public class PhoneNumberAuthenticator extends BaseDirectGrantAuthenticator {
 
     @Override
     public void authenticate(AuthenticationFlowContext context) {
+        System.out.println("PhoneNumberAuthenticator=>authenticate: " + context);
 
         String phoneNumber = getPhoneNumber(context);
+        System.out.println("Authenticating number: " + phoneNumber);
 
         if (Validation.isBlank(phoneNumber)){
+            System.out.println("Validation.isBlank(phoneNumber)");
             invalidCredentials(context);
             return;
         }
         UserModel user = UserUtils.findUserByPhone(context.getSession().users(),context.getRealm(),phoneNumber);
         if (user == null) {
+            System.out.println("user == null");
             invalidCredentials(context);
             return;
         }

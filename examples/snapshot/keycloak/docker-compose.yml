@@ -1,14 +1,12 @@
 version: '3'
 services:
-
-
   database:
     image: mariadb:latest
-#    restart: always
+    #    restart: always
     ports:
-      - "3306:3306"
+      - '3306:3306'
     volumes:
-      - "/home/data/db:/var/lib/mysql"
+      - '~/data/db/:/var/lib/mysql'
     environment:
       MYSQL_ROOT_PASSWORD: p0stgr@s
       MYSQL_DATABASE: keycloak
@@ -16,21 +14,18 @@ services:
       MYSQL_PASSWORD: k@ycl0ck
       TZ: Asia/Shanghai
 
-
-
   keycloak:
     image: keycloak-phone:snapshot
-#    restart: always
+    #    restart: always
     ports:
       - 8901:8080
     environment:
-      SMS_PROVIDER_SERVER: twilio
-      SMS_TOKEN_EXPIRES: 180
-      SMS_HOUR_MAXIMUM: 3
-      TWILIO_ACCOUNT_ID: "your id"
-      TWILIO_AUTH_TOKEN:  "your auth token"
-      TWILIO_SEND_PHONE_NUMBER: "your send phone number"
-
+      # SMS_PROVIDER_SERVER: twilio
+      # SMS_TOKEN_EXPIRES: 180
+      # SMS_HOUR_MAXIMUM: 3
+      # TWILIO_ACCOUNT_ID: 'your id'
+      # TWILIO_AUTH_TOKEN: 'your auth token'
+      # TWILIO_SEND_PHONE_NUMBER: 'your send phone number'
 
       KEYCLOAK_USER: admin
       KEYCLOAK_PASSWORD: admin
@@ -44,4 +39,3 @@ services:
       - database:database
     depends_on:
       - database
-

@@ -28,6 +28,8 @@ public class EverybodyPhoneAuthenticator extends AuthenticationCodeAuthenticator
 
   @Override
   public void authenticate(AuthenticationFlowContext context){
+
+    System.out.println("EverybodyPhoneNumberAuthenticator=>authenticate: " + context);
     String phoneNumber = getPhoneNumber(context);
 
     if (Validation.isBlank(phoneNumber)){

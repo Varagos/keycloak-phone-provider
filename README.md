@@ -44,6 +44,24 @@ docker image is [coopersoft/keycloak-phone:11.0.3](https://hub.docker.com/layers
 for examples [docker-compose.yml](https://raw.githubusercontent.com/cooper-lyt/keycloak-phone-provider/master/examples/docker-compose.yml)
 run as `docker-compose up` , docker-compose is required! (image base on [keycloak-callback:11.0.3](https://github.com/cooper-lyt/keycloak-callback-provider) provide registration callback for http get , post , rocketmq , or else)
 
+<hr />
+
+Comment unwanted providers from Dockerfile, and from jboss-cli/
+(In root of repo) -> creates target directory with Wildly folder structure
+mvn clean
+mvn package
+mvn docker:build
+
+Change provider in docker compose
+Cd into examples/snapshot/keycloak
+./run-local.sh
+
+Keycloak is ready on http://localhost:8901
+user: admin
+pass: admin
+
+<hr />
+
 If you want to build the project, simply run `mvn clean package docker:build` after cloning the repository.
 At the end of the goal.
 
@@ -94,7 +112,9 @@ Finally, register the required actions `Update Phone Number` and `Configure OTP 
 
 <hr/>
 
-## Only use phone login or get Access token use endpoints:
+## get Access token use endpoints
+
+### Only use phone login (requires being registered) :
 
 Under Authentication > Flows:
 
@@ -104,8 +124,15 @@ Under Authentication > Flows:
 - Delete or disable other
 - Set both of 'Provide Phone Number' and 'Provide Verification Code' to 'REQUIRED'
 
-Under 'Clients > $YOUR_CLIENT > Authentication Flow Overrides' or 'Authentication > Bindings'
-Set Direct Grant Flow to 'Direct grant with phone'
+Your can either bind a client to this flow:
+
+- Under _Clients > $YOUR_CLIENT_
+- _Authentication Flow Overrides_
+- Set **Direct Grant** Flow to _Direct grant with phone_  
+  OR  
+  You can set it as global default by
+- _'Authentication > Bindings'_
+- Set **Direct Grant** Flow to _'Direct grant with phone'_
 
 <hr/>
 
@@ -186,9 +213,14 @@ You'll get 2 extra endpoints that are useful to do the verification from a custo
 You'll get 2 extra endpoints that are useful to do the access token from a custom application.
 
 - GET /auth/realms/{realmName}/sms/authentication-code?phoneNumber=+5534990001234 (To request a number verification. No auth required.)
-- POST /auth/realms/shuashua/protocol/openid-connect/token
-  Content-Type: application/x-www-form-urlencoded
-  grant_type=password&phone_number=$PHONE_NUMBER&code=$VERIFICATION_CODE&client_id=$CLIENT_ID&client_secret=CLIENT_SECRECT
+- POST /auth/realms/shuashua/protocol/openid-connect/token  
+  Content-Type: application/x-www-form-urlencoded  
+  Body:
+  - grant_type=password
+  - phone_number=$PHONE_NUMBER
+  - code=$VERIFICATION_CODE
+  - client_id=$CLIENT_ID
+  - client_secret=CLIENT_SECRECT
 
 And then use Verification Code authentication flow with the code to obtain an access code.
 
@@ -197,3 +229,27 @@ And then use Verification Code authentication flow with the code to obtain an ac
 Some code written is based on existing ones in these two projects: [keycloak-sms-provider](https://github.com/mths0x5f/keycloak-sms-provider)
 and [keycloak-phone-authenticator](https://github.com/FX-HAO/keycloak-phone-authenticator). Certainly I would have many problems
 coding all those providers blindly. Thank you!
+
+————REGISTER————
+
+When a user registers Screen
+Send code button
+URL = http://localhost:8901/auth/realms/bitloops/sms/registration-code?phoneNumber=6978756666
+Method=‘GET’
+Cookie: KC_RESTART=eyJhbGciOiJIUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJkMmI0ZGMxMC0xOGVlLTQwZDAtOGUyMi1iN2RjNWM2ZmY3MGEifQ.eyJjaWQiOiJzZWN1cml0eS1hZG1pbi1jb25zb2xlIiwicHR5Ijoib3BlbmlkLWNvbm5lY3QiLCJydXJpIjoiaHR0cDovL2xvY2FsaG9zdDo4OTAxL2F1dGgvYWRtaW4vYml0bG9vcHMvY29uc29sZS8jL2ZvcmJpZGRlbiIsImFjdCI6IkFVVEhFTlRJQ0FURSIsIm5vdGVzIjp7InNjb3BlIjoib3BlbmlkIiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo4OTAxL2F1dGgvcmVhbG1zL2JpdGxvb3BzIiwicmVzcG9uc2VfdHlwZSI6ImNvZGUiLCJjb2RlX2NoYWxsZW5nZV9tZXRob2QiOiJTMjU2IiwicmVkaXJlY3RfdXJpIjoiaHR0cDovL2xvY2FsaG9zdDo4OTAxL2F1dGgvYWRtaW4vYml0bG9vcHMvY29uc29sZS8jL2ZvcmJpZGRlbiIsInN0YXRlIjoiMTZlZmQ3YTktM2Y4NS00YmUwLWI4OGEtMzVkNGZkYWYyY2NmIiwibm9uY2UiOiI5NDg3MjgzZi02NGFiLTQ1YzgtODM5YS03YTUyMGM5ZmQ0Y2EiLCJjb2RlX2NoYWxsZW5nZSI6IktSUkdvZjRtNFJmWnZNZjVON3JNeDRCUktYNzhZc0UwWDZRaDJXRTZPbTQiLCJyZXNwb25zZV9tb2RlIjoiZnJhZ21lbnQifX0.6rzrjEPwdcytl6C0vHTRGOZ9KA-4XnaBsNytTrt0Avw; AUTH_SESSION_ID=056ebeab-383e-46aa-be22-1878498eeed0.6bc6be4fb49f; AUTH_SESSION_ID_LEGACY=056ebeab-383e-46aa-be22-1878498eeed0.6bc6be4fb49f
+
+Register When we have code
+
+URL: http://localhost:8901/auth/realms/bitloops/login-actions/registration?session_code=WkbCOSu2uxfrPncqOizTwR16M5q7wCwTjiuCfY4LxAQ&execution=e166bebc-d640-4296-ab2c-dff33ab9eee8&client_id=security-admin-console&tab_id=G32tDE6WwOQ
+Content-Type: application/x-www-form-urlencoded
+
+-     	Cookie: AUTH_SESSION_ID=52276154-8fe8-42b4-8705-ba7d2f93a659.6bc6be4fb49f; AUTH_SESSION_ID_LEGACY=52276154-8fe8-42b4-8705-ba7d2f93a659.6bc6be4fb49f; KC_RESTART=eyJhbGciOiJIUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJkMmI0ZGMxMC0xOGVlLTQwZDAtOGUyMi1iN2RjNWM2ZmY3MGEifQ.eyJjaWQiOiJzZWN1cml0eS1hZG1pbi1jb25zb2xlIiwicHR5Ijoib3BlbmlkLWNvbm5lY3QiLCJydXJpIjoiaHR0cDovL2xvY2FsaG9zdDo4OTAxL2F1dGgvYWRtaW4vYml0bG9vcHMvY29uc29sZS8jL2ZvcmJpZGRlbiIsImFjdCI6IkFVVEhFTlRJQ0FURSIsIm5vdGVzIjp7InNjb3BlIjoib3BlbmlkIiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo4OTAxL2F1dGgvcmVhbG1zL2JpdGxvb3BzIiwicmVzcG9uc2VfdHlwZSI6ImNvZGUiLCJjb2RlX2NoYWxsZW5nZV9tZXRob2QiOiJTMjU2IiwicmVkaXJlY3RfdXJpIjoiaHR0cDovL2xvY2FsaG9zdDo4OTAxL2F1dGgvYWRtaW4vYml0bG9vcHMvY29uc29sZS8jL2ZvcmJpZGRlbiIsInN0YXRlIjoiYzg2ZDU1NjQtMDcwZS00OGIwLThmZTYtZGI1OTJkM2MzNmU4Iiwibm9uY2UiOiJjN2Y0ODJlMi00NTJhLTQzODctODUxZi1mNzQwNmQ2OTE0NjkiLCJjb2RlX2NoYWxsZW5nZSI6IlU0WFhHOVZCVC1Icmljd1ZNY0RuTXVESWZsTzEwSXotSm8xd3pIMzgtb3MiLCJyZXNwb25zZV9tb2RlIjoiZnJhZ21lbnQifX0.nAd7Ih0V6KdxathbW_KfpANk_BdQ2L96td1WaV_kiwg
+
+Query String Parameters session_code: WkbCOSu2uxfrPncqOizTwR16M5q7wCwTjiuCfY4LxAQ
+
+-     	execution: e166bebc-d640-4296-ab2c-dff33ab9eee8
+-     	client_id: security-admin-console
+-     	tab_id: G32tDE6WwOQ
+  Form Data
+-     	phoneNumber: 6978756666
+-     	registerCode: 559195
